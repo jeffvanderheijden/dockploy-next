@@ -1,5 +1,12 @@
+import { headers } from "next/headers";
+
 async function getNotes() {
-    const res = await fetch("http://localhost:3000/api/notes", { cache: "no-store" });
+    const h = headers();
+    const host = h.get("host");                 // bv. playground-...traefik.me
+    const proto = h.get("x-forwarded-proto") || "http"; // achter proxy
+
+    const res = await fetch(`${proto}://${host}/api/notes`, { cache: "no-store" });
+    if (!res.ok) return { notes: [] };
     return res.json();
 }
 
@@ -15,7 +22,12 @@ export default async function Page() {
 
             <h2>Notes (in-memory)</h2>
             <form method="post" action="/api/notes">
-                <input name="text" placeholder="Add a note..." required style={{ padding: 10, width: 320 }} />
+                <input
+                    name="text"
+                    placeholder="Add a note..."
+                    required
+                    style={{ padding: 10, width: 320 }}
+                />
                 <button style={{ padding: "10px 14px", marginLeft: 8 }}>Add</button>
             </form>
 
